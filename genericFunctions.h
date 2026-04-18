@@ -49,12 +49,3 @@ void clearScreen() {
         system("clear");
     }
 }
-
-
-void returnToMainMenu() {
-
-    //while (getchar() != '\n');
-    printf("\n\nPlease press Enter to return to the main Menu:");
-    getchar();
-    clearScreen();
-}

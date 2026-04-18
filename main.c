@@ -1,118 +1,46 @@
 
 #define _CRT_SECURE_NO_WARNINGS
+#define EXIT 'X'
+#define BUY_CAR 'B'
+#define VIEW_CARS 'A'
+#define VIEW_SALES 'C'
+#define MAX_CAR_ARRAY_SIZE 6
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
+
+/* #include <stdlib.h>
 #include "data.h"
 
 
 #include "fileFunctions.h"
 #include "sortFunction.h"
 #include "genericFunctions.h"
+*/
 
 
+struct Car {
+    char name[100];
+    int quantity;
+    int price;
+};
 
-
-
-
-int exitProgram = 0;
-
-
-void mainMenuPrintStatements() {
-    printf("\n\n______Main Menu________\n\n");
-    printf("Type A to view car selection\n");
-    printf("\nType B to buy a car\n");
-    printf("\nType C to view sales\n");
-    printf("\nType X to exit\n");
-    printf("\nEnter:");
-}
-
-
-
-void mainMenu() {
-    printf("\n ______Welcome to BAINS AUTOS LTD______\n\n\n");
-    while (exitProgram == 0) {
-        char response;
-
-
-        mainMenuPrintStatements();
-
-
-        scanf("\n%c", &response);
-        response = toupper(response);
-        if (getchar() != '\n') {
-            response = 'z';
-        }
-
-        switch (response) {
-
-        case VIEW_CARS:
-            viewCars();
-            returnToMainMenu();
-            break;
-
-        case BUY_CAR:
-            buyCars();
-            returnToMainMenu();
-            break;
-
-        case VIEW_SALES:
-            viewSales();
-            returnToMainMenu();
-            break;
-
-        case 'z':
-            printf("Please enter only one character.");
-            break;
-
-        case EXIT:
-            printf("Have a nice day. :)");
-            exitProgram = 1;
-            break;
-
-        default:
-            printf("\nPlease enter an appropriate response.");
-            break;
-        }
-
-        /**
-        if (response == EXIT) {
-            printf("Have a nice day. :)");
-            //setting not exit equal to 0 ends the while loop which is the main menu
-            exitProgram = 1;
-        }
-        //Telling the user if they haven't chosen one of the acceptable options
-        else if (response != 'A' && response != 'B' && response != 'C' && response != 'X') {
-            printf("\nPlease enter an appropriate response.");
-
-        }
-        **/
-
-        clearScreen();
+void viewCars(const struct Car cars[], int size) {
+    printf("This is it lads.\n");
+    for (int i = 0; i < size; i++) {
+       printf("%s - %d\n", cars[i].name, cars[i].quantity);
     }
+    //sortCarArray();
 
-}
-
-
-
-
-
-
-void viewCars() {
-    sortCarArray();
-
-    clearScreen();
-    printf("\n\n ____Available Models____\n\n");
+    //clearScreen();
+    /*printf("\n\n ____Available Models____\n\n");
     for (int i = 0; i < MAX_CAR_ARRAY_SIZE; i++) {
         printf("We have %d %s's available at £%d. \n", carArray[i].carQuantity, carArray[i].carName, carArray[i].carPrice);
-    }
+        }*/
 
 }
-
-
-
+/*
 int buyCars() {
     int invalidCarChosen = 1;
     char carName[100];
@@ -312,20 +240,106 @@ void viewSales() {
 
 
 
+*/
+
+void printMainMenu() {
+    printf("\n\n______Main Menu________\n\n");
+    printf("Type A to view car selection\n");
+    printf("\nType B to buy a car\n");
+    printf("\nType C to view sales\n");
+    printf("\nType X to exit\n");
+    printf("\nEnter: ");
+}
+
+char getResponse() {
+    char response;
+    scanf("\n%c", &response);
+    response = toupper(response);
+    if (getchar() != '\n') {
+        response = 'z';
+    }
+    return response;
+
+}
+/*
+
+    void returnToMainMenu() {
+
+        //while (getchar() != '\n');
+        printf("\n\nPlease press Enter to return to the main Menu:");
+        getchar();
+        clearScreen();
+    }
+ */
+
+void printBanner() {
+    printf("\n ______Welcome to BAINS AUTOS LTD______\n\n\n");
+}
+
+void mainMenu() {
+    int exitProgram = 0;
+    while (!exitProgram) {
+
+
+        printMainMenu();
+        char response = getResponse();
+
+        switch (response) {
+
+        case VIEW_CARS:
+            printf("Viewing cars");
+            //viewCars();
+            //returnToMainMenu();
+            break;
+
+        case BUY_CAR:
+            printf("Buying cars");
+            //buyCars();
+            //returnToMainMenu();
+            break;
+
+        case VIEW_SALES:
+            printf("Viewing sales");
+            //viewSales();
+            //returnToMainMenu();
+            break;
+
+        case 'z':
+            printf("Please enter only one character.");
+            break;
+
+        case EXIT:
+            printf("Have a nice day. :)");
+            exitProgram = 1;
+            break;
+
+        default:
+            printf("\nPlease enter an appropriate response.");
+            break;
+        }
+
+
+        //clearScreen();
+    }
+
+}
 
 
 
+int main(void) {
 
-
-
-
-
-
-void main()
-{
-
-    ReadDataFromFile();
-    mainMenu();
-    writeDataToFile();
+    //ReadDataFromFile();
+    //mainMenu();
+    struct Car cars[MAX_CAR_ARRAY_SIZE] = {
+        {"Audi A1", 10, 23000},
+        {"Ford Fiesta", 6, 18000},
+        {"Vauxhall Astra", 10, 21000},
+        {"BMW", 10, 30000},
+        {"Nissan Duke", 7, 22000},
+        {"Volkswagen Golf", 5, 28000}
+    };
+    viewCars(cars, MAX_CAR_ARRAY_SIZE);
+    //writeDataToFile();
+    return 0;
 
 }
