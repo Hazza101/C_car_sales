@@ -27,72 +27,87 @@ struct Car {
 };
 
 void viewCars(const struct Car cars[], int size) {
-    printf("This is it lads.\n");
-    for (int i = 0; i < size; i++) {
-       printf("%s - %d\n", cars[i].name, cars[i].quantity);
-    }
+
     //sortCarArray();
 
     //clearScreen();
-    /*printf("\n\n ____Available Models____\n\n");
-    for (int i = 0; i < MAX_CAR_ARRAY_SIZE; i++) {
-        printf("We have %d %s's available at £%d. \n", carArray[i].carQuantity, carArray[i].carName, carArray[i].carPrice);
-        }*/
-
-}
-/*
-int buyCars() {
-    int invalidCarChosen = 1;
-    char carName[100];
-    int carIndex;
-    clearScreen();
-    while (invalidCarChosen == 1)
-    {
-
-        printf("\n\nPlease enter one of our car models\n\n");
-        viewCars();
-
-        printf("\n\nType exit to return to main menu\n\n");
-        printf("\nWhat car would you like to buy? \n\n");
-        char userResponse[100];
-        scanf("\n%[^\n]s", userResponse);
-        if (strcmp(userResponse, "exit") == 0) {
-            return 0;
-        }
-
-        for (int i = 0; i < MAX_CAR_ARRAY_SIZE; i++)
-        {
-
-            int stringComparison;
-
-
-            stringComparison = strcmp(userResponse, carArray[i].carName);
-
-            if (stringComparison == 0)
-            {
-
-
-                strcpy(carName, carArray[i].carName);
-                invalidCarChosen = 0;
-                carIndex = i;
-
-
-            }
-        }
-        if (invalidCarChosen == 1)
-        {
-
-            clearScreen();
-            printf("Invalid Car Choice. Car Names are case sensitive.");
-
-
-        }
+    printf("\n\n ____Available Models____\n\n");
+    for (int i = 0; i < size; i++) {
+        printf("We have %d %s's available at $%d. \n", cars[i].quantity, cars[i].name, cars[i].price);
     }
 
+}
+
+int chooseCar(const struct Car cars[], int size) {
+   int invalidCarChosen = 1;
+
+   while (invalidCarChosen) {
+
+       printf("\nWhat car would you like to buy? \n\n");
+       char userResponse[100];
+       scanf("\n%[^\n]s", userResponse);
+
+       if (strcmp(userResponse, "exit") == 0) {
+           return -1;
+       }
+
+       for (int i = 0; i < size; i++)
+       {
+
+           int stringComparison;
+           stringComparison = strcmp(userResponse, cars[i].name);
+
+           if (stringComparison == 0)
+           {
+               return i;
+           }
+       }
+
+       printf("Invalid Car Choice. Car Names are case sensitive.");
+   }
+   return -1;
+}
+
+int getCustomerName(char *name, size_t size) {
+    int isValidName = 1;
+    while (isValidName) {
+        printf("Full Name: ");
+        if (fgets(name, size, stdin) == NULL) {
+            printf("Invalid input!\n");
+            continue;
+        }
+
+        name[strcspn(name, "\n")] = '\0';
+
+        if (name[0] == '\0') {
+            printf("Please enter something!\n");
+            continue;
+        }
+        if (strcmp(name, "exit") == 0) {
+            return -1;
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+int buyCars(const struct Car cars[], int size) {
+
+    int isExit;
+
+    struct Car car;
+    int isExit = chooseCar(cars, size, car);
+    //printf("\n%d\n", carIndex);
 
     char customerName[100];
-
-    printf("\nWhat is your full name?\n\n");
+    isExit = getCustomerName(customerName, sizeof(customerName));
+    if (isExit == -1) {
+        return -1;
+    }
+    printf("%s\n", customerName);
+    /*
     getchar();
     fgets(customerName, 100, stdin);
     customerName[strlen(customerName) - 1] = '\0';
@@ -194,21 +209,9 @@ int buyCars() {
     customerArray[salesIndex].membership = membership;
 
     carArray[carIndex].carQuantity -= numOfCarsToBuy;
-    invalidCarChosen = 0;
-
-
-
-
-
-
-
-
-
+    invalidCarChosen = 0;*/
 }
-
-
-
-
+/*
 void viewSales() {
 
     sortCustomerArray();
@@ -229,19 +232,7 @@ void viewSales() {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
 */
-
 void printMainMenu() {
     printf("\n\n______Main Menu________\n\n");
     printf("Type A to view car selection\n");
@@ -324,8 +315,6 @@ void mainMenu() {
 
 }
 
-
-
 int main(void) {
 
     //ReadDataFromFile();
@@ -338,7 +327,7 @@ int main(void) {
         {"Nissan Duke", 7, 22000},
         {"Volkswagen Golf", 5, 28000}
     };
-    viewCars(cars, MAX_CAR_ARRAY_SIZE);
+    buyCars(cars, 6);
     //writeDataToFile();
     return 0;
 
