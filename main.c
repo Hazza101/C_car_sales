@@ -10,7 +10,8 @@
 #include <string.h>
 #include <ctype.h>
 
-/* #include <stdlib.h>
+#include <stdlib.h>
+/*
 #include "data.h"
 
 
@@ -38,7 +39,7 @@ void viewCars(const struct Car cars[], int size) {
 
 }
 
-int chooseCar(const struct Car cars[], int size) {
+int chooseCar(const struct Car cars[], int size, struct Car *car) {
    int invalidCarChosen = 1;
 
    while (invalidCarChosen) {
@@ -46,7 +47,7 @@ int chooseCar(const struct Car cars[], int size) {
        printf("\nWhat car would you like to buy? \n\n");
        char userResponse[100];
        scanf("\n%[^\n]s", userResponse);
-
+       getchar();
        if (strcmp(userResponse, "exit") == 0) {
            return -1;
        }
@@ -59,13 +60,52 @@ int chooseCar(const struct Car cars[], int size) {
 
            if (stringComparison == 0)
            {
-               return i;
+               *car = cars[i];
+               return 1;
            }
        }
 
        printf("Invalid Car Choice. Car Names are case sensitive.");
    }
    return -1;
+}
+
+int getValidNumberOfCars(const struct Car car, int* numberOfCars) {
+
+    int invalidNumOfCars = 1;
+    char input[100];
+    while (invalidNumOfCars)
+    {
+
+        printf("Quantity: ");
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            return -1;
+        }
+        input[strcspn(input, "\n")] = '\0';
+        if (strcmp(input, "exit") == 0) {
+            return -1;
+        }
+
+        char* endptr;
+        long val = strtol(input, &endptr, 10);
+
+        if (*endptr != '\0') {
+            printf("Please enter a valid number!\n");
+            continue;
+        }
+        *numberOfCars = (int) val;
+
+        if (*numberOfCars > car.quantity || *numberOfCars <= 0)
+        {
+
+            printf("\nWe only have %d left.\n", car.quantity);
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    return 1;
 }
 
 int getCustomerName(char *name, size_t size) {
@@ -76,7 +116,6 @@ int getCustomerName(char *name, size_t size) {
             printf("Invalid input!\n");
             continue;
         }
-
         name[strcspn(name, "\n")] = '\0';
 
         if (name[0] == '\0') {
@@ -93,13 +132,63 @@ int getCustomerName(char *name, size_t size) {
     return 0;
 }
 
+int getYoungAdultDiscount(char* discountGiven, float* discount) {
+    int age;
+    char input[100];
+    int hasEnteredAge = 1;
+    while ( hasEnteredAge ) {
+
+        printf("Age: ");
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            return -1;
+        }
+
+        input[strcspn(input, "\n")] = '\0';
+
+        if ( strcmp(input, "exit") == 0 ) {
+            return -1;
+        }
+
+        char* endptr;
+        double val = strtol(input, &endptr, 10);
+
+        if (*endptr != '\0') {
+            printf("Please enter a valid number!\n");
+            continue;
+        }
+
+        age = (int) val;
+
+
+        if (age <= 25 && age >= 18) {
+
+            printf("Congratulations you qualify for a discount of 15%%.\n");
+            *discount = 0.85;
+            *discountGiven = 'Y';
+
+        } else {
+            printf("No discount given.!\n");
+            *discount = 1;
+            *discountGiven = 'N';
+        }
+
+        return 1;
+    }
+
+
+    return -1;
+}
+
 int buyCars(const struct Car cars[], int size) {
 
     int isExit;
 
     struct Car car;
-    int isExit = chooseCar(cars, size, car);
-    //printf("\n%d\n", carIndex);
+    isExit = chooseCar(cars, size, &car);
+    if (isExit == -1) {
+        return -1;
+    }
+    printf("%s\n", car.name);
 
     char customerName[100];
     isExit = getCustomerName(customerName, sizeof(customerName));
@@ -107,57 +196,26 @@ int buyCars(const struct Car cars[], int size) {
         return -1;
     }
     printf("%s\n", customerName);
-    /*
-    getchar();
-    fgets(customerName, 100, stdin);
-    customerName[strlen(customerName) - 1] = '\0';
-    if (strcmp(customerName, "exit") == 0) {
-        return 0;
+
+
+    int numberOfCars;
+    isExit = getValidNumberOfCars(car, &numberOfCars);
+    if (isExit == -1) {
+        return -1;
     }
+    printf("%d\n", numberOfCars);
 
 
-    int invalidNumOfCars = 1;
-    int numOfCarsToBuy;
-    while (invalidNumOfCars == 1)
-    {
-
-        printf("\nHow many would you like to buy?\n\n");
-        numOfCarsToBuy = getValidatedWholeNumber();
-        if (numOfCarsToBuy == 2000) {
-            return 0;
-        }
-
-        if (numOfCarsToBuy > carArray[carIndex].carQuantity || numOfCarsToBuy <= 0)
-        {
-
-            printf("\nWe only have %d left.\n", carArray[carIndex].carQuantity);
-        }
-        else
-        {
-            invalidNumOfCars = 0;
-        }
-    }
-
-    int age;
     char discountGiven;
-    char membership;
+    char membership = '?';
     float discount = 1;
-
-    printf("\nWhat is your age?\n\n");
-    age = getValidatedWholeNumber();
-    if (age == 2000) {
-        return 0;
+    isExit = getYoungAdultDiscount(&discountGiven, &discount);
+    if (isExit == -1) {
+        return -1;
     }
 
-    if (age <= 25 && age >= 18) {
-
-        printf("\nCongratulations you qualify for a discount of 15%%.");
-        discount = 0.85;
-        discountGiven = 'Y';
-        membership = '?';
-
-    }
-
+    printf("%c", discountGiven);
+    /*
     else
     {
         printf("\nDo you hold a membership card with us? (Y/N)\n\n");
