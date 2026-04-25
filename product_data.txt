@@ -1,0 +1,6 @@
+Audi A1,10,23000
+Ford Fiesta,6,18000
+Vauxhall Astra,10,21000
+BMW,10,30000
+Nissan Duke,7,22000
+Volkswagen Golf,5,28000

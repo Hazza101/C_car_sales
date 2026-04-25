@@ -27,6 +27,16 @@ struct Car {
     int price;
 };
 
+struct Sale {
+    char car[100];
+    char name[100];
+    int quantity;
+    int price;
+    char discountGiven;
+    char membership;
+    float discountPercent;
+};
+
 void viewCars(const struct Car cars[], int size) {
 
     //sortCarArray();
@@ -39,12 +49,12 @@ void viewCars(const struct Car cars[], int size) {
 
 }
 
-int chooseCar(const struct Car cars[], int size, struct Car *car) {
+int chooseCar(struct Car cars[], int size, struct Car **car) {
    int invalidCarChosen = 1;
 
    while (invalidCarChosen) {
 
-       printf("\nWhat car would you like to buy? \n\n");
+       printf("What car would you like to buy?: ");
        char userResponse[100];
        scanf("\n%[^\n]s", userResponse);
        getchar();
@@ -60,17 +70,17 @@ int chooseCar(const struct Car cars[], int size, struct Car *car) {
 
            if (stringComparison == 0)
            {
-               *car = cars[i];
+               *car = &cars[i];
                return 1;
            }
        }
 
-       printf("Invalid Car Choice. Car Names are case sensitive.");
+       printf("Invalid Car Choice. Car Names are case sensitive.\n");
    }
    return -1;
 }
 
-int getValidNumberOfCars(const struct Car car, int* numberOfCars) {
+int getValidNumberOfCars(const struct Car *car, int* numberOfCars) {
 
     int invalidNumOfCars = 1;
     char input[100];
@@ -95,10 +105,10 @@ int getValidNumberOfCars(const struct Car car, int* numberOfCars) {
         }
         *numberOfCars = (int) val;
 
-        if (*numberOfCars > car.quantity || *numberOfCars <= 0)
+        if (*numberOfCars > car->quantity || *numberOfCars <= 0)
         {
 
-            printf("\nWe only have %d left.\n", car.quantity);
+            printf("We only have %d left.\n", car->quantity);
         }
         else
         {
@@ -179,23 +189,65 @@ int getYoungAdultDiscount(char* discountGiven, float* discount) {
     return -1;
 }
 
-int buyCars(const struct Car cars[], int size) {
+int getMembershipDiscount(char* discountGiven, float* discount, char* membership) {
+    int invalidAnswer = 1;
+    char input[10];
+    while (invalidAnswer) {
+       printf("Membership?(Y/N): ");
+       if (fgets(input, sizeof(input), stdin) == NULL) {
+           return -1;
+       }
+
+       input[strcspn(input, "\n")] = '\0';
+
+       if ( strcmp(input, "exit") == 0 ) {
+           return -1;
+       }
+
+       if ( strlen(input) > 1) {
+           printf("Invalid input\n");
+           continue;
+       }
+
+       if ( strcmp(input, "Y") == 0 ) {
+
+           printf("Congratulations you qualify for a discount of 30%%.\n");
+           *discount = 0.7;
+           *discountGiven = 'Y';
+           *membership = 'Y';
+           return 1;
+
+       } else if ( strcmp(input, "N") == 0 ) {
+
+           printf("No discount\n");
+           *membership = 'N';
+           *discountGiven = 'N';
+           *discount = 1;
+           return 0;
+       } else {
+           printf("Invalid input\n");
+       }
+
+
+    }
+    return -1;
+}
+
+int buyCars(struct Car cars[], int size, struct Sale* sale) {
 
     int isExit;
 
-    struct Car car;
+    struct Car *car;
     isExit = chooseCar(cars, size, &car);
     if (isExit == -1) {
         return -1;
     }
-    printf("%s\n", car.name);
 
     char customerName[100];
     isExit = getCustomerName(customerName, sizeof(customerName));
     if (isExit == -1) {
         return -1;
     }
-    printf("%s\n", customerName);
 
 
     int numberOfCars;
@@ -203,7 +255,6 @@ int buyCars(const struct Car cars[], int size) {
     if (isExit == -1) {
         return -1;
     }
-    printf("%d\n", numberOfCars);
 
 
     char discountGiven;
@@ -213,61 +264,27 @@ int buyCars(const struct Car cars[], int size) {
     if (isExit == -1) {
         return -1;
     }
+    if (discountGiven != 'Y') {
 
-    printf("%c", discountGiven);
-    /*
-    else
-    {
-        printf("\nDo you hold a membership card with us? (Y/N)\n\n");
-        scanf("\n%c", &membership);
-
-        if (getchar() != '\n') {
-            char exitString[10];
-            scanf("%s", exitString);
-            if (strcmp(exitString, "it") == 0) {
-                return 0;
-            }
-
+        isExit = getMembershipDiscount(&discountGiven, &discount, &membership);
+        if (isExit == -1) {
+            return -1;
         }
 
-        if (membership == 'Y' || membership == 'y')
-        {
-
-            printf("\n\nCongratulations you qualify for a discount of 30%%.");
-            discount = 0.7;
-            discountGiven = 'Y';
-            membership = 'Y';
-
-        }
-
-        else
-        {
-
-            printf("\n\nNo discount");
-            membership = 'N';
-            discountGiven = 'N';
-
-        }
     }
 
-    printf("\n\nThank you for buying a car.");
+    printf("Thank you for buying a car.\n");
+    printf("Car: %s\nName: %s\nQuantity: %d\nMembership: %c\nDiscount given: %c\nDiscount percent: %f\nPrice: %d\n", car->name, customerName, numberOfCars, membership, discountGiven, 1-discount, car->price);
+    car->quantity -= numberOfCars;
+    strcpy(sale->car, car->name);
+    strcpy(sale->name, customerName);
+    sale->quantity = numberOfCars;
+    sale->membership = membership;
+    sale->discountGiven = discountGiven;
+    sale->discountPercent = 1 - discount;
+    sale->price = car->price;
+    return 1;
 
-    float totalPrice = numOfCarsToBuy * carArray[carIndex].carPrice * discount;
-    printf("\nTotal Price : £%d", (int)totalPrice);
-    discount = (1 - discount) * 100;
-    int salesIndex = getNumberOfSales();
-
-    strcpy(customerArray[salesIndex].customerName, customerName);
-    strcpy(customerArray[salesIndex].carName, carName);
-    customerArray[salesIndex].discount = discount;
-    customerArray[salesIndex].discountGiven = discountGiven;
-    customerArray[salesIndex].numberOfCars = numOfCarsToBuy;
-    customerArray[salesIndex].totalPrice = totalPrice;
-    customerArray[salesIndex].age = age;
-    customerArray[salesIndex].membership = membership;
-
-    carArray[carIndex].carQuantity -= numOfCarsToBuy;
-    invalidCarChosen = 0;*/
 }
 /*
 void viewSales() {
@@ -373,19 +390,31 @@ void mainMenu() {
 
 }
 
+int readCarData(struct Car cars[], int size, char filename[]) {
+    printf("%s\n", filename);
+    FILE* fp = fopen(filename, "r");
+    if (fp == NULL) {
+        printf("Something went wrong.");
+        return -1;
+    }
+    int i = 0;
+    while ( fscanf(fp, "%99[^,],%d,%d\n", cars[i].name, &cars[i].quantity, &cars[i].price) == 3 ) {
+        i++;
+    }
+    return 1;
+}
+
 int main(void) {
 
-    //ReadDataFromFile();
     //mainMenu();
-    struct Car cars[MAX_CAR_ARRAY_SIZE] = {
-        {"Audi A1", 10, 23000},
-        {"Ford Fiesta", 6, 18000},
-        {"Vauxhall Astra", 10, 21000},
-        {"BMW", 10, 30000},
-        {"Nissan Duke", 7, 22000},
-        {"Volkswagen Golf", 5, 28000}
-    };
-    buyCars(cars, 6);
+    struct Car cars[MAX_CAR_ARRAY_SIZE];
+    readCarData(cars, MAX_CAR_ARRAY_SIZE, "product_data.txt");
+
+    viewCars(cars, 6);
+    //struct Sale sale;
+    //buyCars(cars, 6, &sale);
+    //printf("%s\n", sale.car);
+    // viewCars(cars, 6);
     //writeDataToFile();
     return 0;
 
