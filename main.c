@@ -404,6 +404,18 @@ int readCarData(struct Car cars[], int size, char filename[]) {
     return 1;
 }
 
+int writeCarData(struct Car cars[], int size, char filename[]) {
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL) {
+        printf("Something went wrong.");
+        return -1;
+    }
+    for (int i = 0; i < size; i++) {
+        fprintf(fp, "%s,%d,%d\n", cars[i].name, cars[i].quantity, cars[i].price);
+    }
+    return 1;
+}
+
 int main(void) {
 
     //mainMenu();
@@ -411,8 +423,9 @@ int main(void) {
     readCarData(cars, MAX_CAR_ARRAY_SIZE, "product_data.txt");
 
     viewCars(cars, 6);
-    //struct Sale sale;
-    //buyCars(cars, 6, &sale);
+    struct Sale sale;
+    buyCars(cars, 6, &sale);
+    writeCarData(cars, MAX_CAR_ARRAY_SIZE, "product_data.txt");
     //printf("%s\n", sale.car);
     // viewCars(cars, 6);
     //writeDataToFile();
